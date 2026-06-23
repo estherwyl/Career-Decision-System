@@ -69,6 +69,12 @@ button { cursor: pointer; }
 }
 .brand h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -.01em; white-space: nowrap; }
 .brand .tag { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.demo-pill {
+  display: inline-flex; align-items: center; margin-left: 2px; padding: 3px 8px;
+  border-radius: 999px; background: #f3f8f6; color: var(--teal);
+  border: 1px solid #dbe4e1; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+}
 
 .spacer { flex: 1; }
 
@@ -82,9 +88,12 @@ button { cursor: pointer; }
 .btn:active { transform: translateY(1px); }
 .btn.ghost { background: #fff; color: var(--ink-2); border-color: var(--line); }
 .btn.ghost:hover { background: var(--bg); box-shadow: none; border-color: #d8dbe1; }
+.btn.slim { padding: 7px 11px; font-size: 12.5px; border-radius: 9px; }
 .btn .ic { font-size: 16px; line-height: 1; margin-top: -1px; }
 .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 .btn:disabled:hover { background: var(--teal); }
+.app-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.app-actions input { display: none; }
 
 /* ============================================================
    Full-page leaderboard (default view)
@@ -546,6 +555,8 @@ input[type=range].slider::-moz-range-thumb {
 ::-webkit-scrollbar-thumb { background: #d4d8df; border-radius: 10px; border: 3px solid var(--bg); }
 
 @media (max-width: 720px) {
+  .appbar { align-items: flex-start; flex-direction: column; }
+  .app-actions { width: 100%; justify-content: flex-start; }
   .board-cols { display: none; }
   .board-row { grid-template-columns: 34px 1fr auto; grid-auto-rows: auto; gap: 8px 12px; }
   .br-stage, .br-score, .br-verdict, .br-note { grid-column: 2 / -1; }
@@ -750,38 +761,42 @@ function loadEvals() {
 function saveEvals(list) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch (e) {}
 }
-function seedIfEmpty() {
-  if (localStorage.getItem(STORE_KEY)) return loadEvals();
+function demoSeed() {
   const mk = (company, title, stageId, raw, iso) => {
     const stage = STAGES.find((s) => s.id === stageId);
     const v = evalVerdict(stage, raw);
     return { id: "seed-" + company.replace(/\s+/g, "-").toLowerCase(),
-      company, title, stageId, stageName: stage.name,
-      raw, ts: iso, color: v.color, label: v.label, metricText: v.metricText, norm: v.norm };
+      company, title, stageId, stageName: stage.name, raw,
+      note: "Fictional demo data for portfolio viewing.",
+      ts: iso, color: v.color, label: v.label, metricText: v.metricText, norm: v.norm };
   };
-  const seed = [
-    mk("Lumen", "Principal PM, AI", "offer",
+  return [
+    mk("Northstar Demo Co.", "Principal PM, AI Products", "offer",
       { "Expansion":5,"Aliveness":5,"Resonance":5,"Momentum":4,"Meaning":5,"Sustainability":4,"Self-respect":5 },
       "2026-06-09T09:14:00"),
-    mk("Northwind", "Senior PM, Growth", "discovery",
+    mk("Bright Path Labs", "Senior PM, Growth", "discovery",
       { "Builder Energy":2,"Expansion":2,"Momentum":1,"Resonance":2,"Meaning":1,"Sustainability":2,"Career Signal":1 },
       "2026-06-08T15:32:00"),
-    mk("Brightfold", "PM, Core Product", "hm",
+    mk("Atlas Garden Studio", "PM, Core Product", "hm",
       { choice: "green" },
       "2026-06-08T11:05:00"),
-    mk("Tidewater", "PM, Payments", "recruiter",
+    mk("Harbor Signal", "PM, Platform", "recruiter",
       { "Expansion":4,"Aliveness":4,"Resonance":4,"Momentum":3,"Sustainability":4 },
       "2026-06-07T11:10:00"),
-    mk("Heliograph", "PM, Platform", "discovery",
+    mk("Pebble Cloud", "PM, Internal Tools", "discovery",
       { "Builder Energy":1,"Expansion":1,"Momentum":1,"Resonance":1,"Meaning":1,"Sustainability":1,"Career Signal":0 },
       "2026-06-06T09:48:00"),
-    mk("Mesa Systems", "PM, Operations", "recruiter",
+    mk("Maple Systems", "PM, Operations", "recruiter",
       { "Expansion":3,"Aliveness":2,"Resonance":3,"Momentum":3,"Sustainability":3 },
       "2026-06-05T14:02:00"),
-    mk("Cardinal Labs", "Group PM", "discovery",
+    mk("Paper Lantern Labs", "Group PM", "discovery",
       { "Builder Energy":1,"Expansion":0,"Momentum":1,"Resonance":1,"Meaning":0,"Sustainability":1,"Career Signal":0 },
       "2026-06-04T16:20:00"),
   ];
+}
+function seedIfEmpty() {
+  if (localStorage.getItem(STORE_KEY)) return loadEvals();
+  const seed = demoSeed();
   saveEvals(seed);
   return seed;
 }
@@ -809,7 +824,7 @@ Object.assign(window, {
   STAGES, SCORABLE,
   jdTier, recruiterVerdict, offerVerdict, computeStage, evalVerdict,
   TIERS, tierFromColor, nowStamp, formatStamp, defaultValues, metricChip,
-  loadEvals, saveEvals, seedIfEmpty,
+  loadEvals, saveEvals, demoSeed, seedIfEmpty,
 });
 </script>
 
@@ -1504,6 +1519,7 @@ function App() {
   const [modal, setModal] = useState(null);
   const [archiveTarget, setArchiveTarget] = useState(null);
   const [noteTarget, setNoteTarget] = useState(null);
+  const importRef = React.useRef(null);
 
   useEffect(() => { saveEvals(evals); }, [evals]);
 
@@ -1531,6 +1547,46 @@ function App() {
     ));
     setNoteTarget(null);
   }, []);
+
+  function exportData() {
+    const payload = {
+      app: "Career Decision System",
+      exportedAt: nowStamp(),
+      evaluations: evals,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "career-decision-system-backup.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        const next = Array.isArray(parsed) ? parsed : parsed.evaluations;
+        if (!Array.isArray(next)) throw new Error("Missing evaluations");
+        setEvals(next);
+      } catch (e) {
+        alert("This file does not look like a Career Decision System backup.");
+      } finally {
+        if (importRef.current) importRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetDemo() {
+    if (!window.confirm("Replace the current browser data with fictional demo data? Export first if you want to keep your current tracker.")) return;
+    setEvals(demoSeed());
+  }
 
   function handleSave(draft, stage, verdict) {
     const record = {
@@ -1566,10 +1622,16 @@ function App() {
           <div className="logo">CD</div>
           <div>
             <h1>Career Decision System</h1>
-            <div className="tag">A structured, low-emotion job search</div>
+            <div className="tag">A structured, low-emotion job search <span className="demo-pill">Demo</span></div>
           </div>
         </div>
         <div className="spacer"></div>
+        <div className="app-actions">
+          <button className="btn ghost slim" onClick={exportData}>Export data</button>
+          <button className="btn ghost slim" onClick={() => importRef.current && importRef.current.click()}>Import data</button>
+          <button className="btn ghost slim" onClick={resetDemo}>Reset demo</button>
+          <input ref={importRef} type="file" accept="application/json,.json" onChange={(e) => importData(e.target.files[0])} />
+        </div>
       </header>
 
       <Leaderboard
