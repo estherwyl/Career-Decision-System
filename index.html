@@ -123,9 +123,16 @@ button { cursor: pointer; }
 
 .board-list { display: flex; flex-direction: column; gap: 9px; }
 
+.board-cols {
+  display: grid; align-items: center; gap: 16px;
+  grid-template-columns: 40px minmax(170px, 1.25fr) minmax(130px, .9fr) 82px 140px minmax(150px, .85fr) 82px 98px;
+  padding: 0 18px 0 22px; color: var(--faint); font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+
 .board-row {
   display: grid; align-items: center; gap: 16px;
-  grid-template-columns: 40px minmax(170px, 1.3fr) minmax(150px, 1fr) 92px 168px 92px 98px;
+  grid-template-columns: 40px minmax(170px, 1.25fr) minmax(130px, .9fr) 82px 140px minmax(150px, .85fr) 82px 98px;
   background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--line);
   border-radius: var(--radius-s); padding: 14px 18px; cursor: pointer;
   box-shadow: var(--shadow-s); transition: box-shadow .15s, transform .05s, border-color .15s;
@@ -182,6 +189,25 @@ button { cursor: pointer; }
 .vpill.amber { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-bd); } .vpill.amber .vd { background: var(--amber); }
 .vpill.red   { color: var(--red);   background: var(--red-bg);   border-color: var(--red-bd); }   .vpill.red .vd   { background: var(--red); }
 .vpill.gray  { color: var(--gray);  background: #fff; border-color: var(--gray-bd); } .vpill.gray .vd { background: var(--gray); }
+
+.br-note { min-width: 0; position: relative; }
+.note-btn {
+  display: inline-flex; align-items: center; gap: 7px; max-width: 100%; border: 1px solid transparent;
+  background: transparent; color: var(--muted); border-radius: 9px; padding: 5px 8px;
+  font-size: 13px; font-weight: 600; text-align: left; transition: all .12s;
+}
+.note-btn:hover { background: var(--bg); border-color: var(--line); color: var(--ink-2); }
+.note-btn .plus { font-size: 19px; line-height: 1; margin-top: -1px; }
+.note-btn.has-note { color: var(--teal); background: #f3f8f6; border-color: #dbe4e1; }
+.note-preview { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-tooltip {
+  position: absolute; z-index: 80; left: 8px; top: calc(100% + 8px); width: min(300px, 70vw);
+  background: #1f2329; color: #f7f8fa; border: 1px solid #3c424b; border-radius: 10px;
+  padding: 10px 12px; box-shadow: 0 14px 38px rgba(16,24,40,.25);
+  font-size: 13px; line-height: 1.45; white-space: normal; opacity: 0; pointer-events: none;
+  transform: translateY(-3px); transition: opacity .12s, transform .12s;
+}
+.br-note:hover .note-tooltip, .br-note:focus-within .note-tooltip { opacity: 1; transform: none; }
 
 .br-time { display: flex; flex-direction: column; line-height: 1.3; text-align: right; }
 .br-time .t-date { font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
@@ -307,6 +333,36 @@ button { cursor: pointer; }
 }
 .archive-preview b { display: block; color: var(--ink-2); font-size: 14px; margin-bottom: 2px; }
 .archive-preview span { font-size: 13px; }
+.modal.note-modal {
+  width: min(720px, calc(100% - 28px)); background: #1b2026; color: #f5f7fb;
+  border: 2px solid #91c4ff; box-shadow: 0 24px 70px rgba(0,0,0,.38);
+}
+.note-modal .modal-h { border-bottom-color: #343a43; }
+.note-modal .modal-h h2 { font-size: 26px; color: #fff; }
+.note-modal .modal-h p { color: #c7ccd4; }
+.note-modal .modal-x { border-color: transparent; background: transparent; color: #d7dbe1; font-size: 24px; }
+.note-modal .modal-x:hover { background: #262c34; color: #fff; }
+.note-job {
+  display: flex; gap: 15px; align-items: center; padding: 22px 28px 4px;
+}
+.note-job-logo {
+  width: 58px; height: 58px; border-radius: 8px; background: var(--teal); color: #fff;
+  display: grid; place-items: center; font-weight: 700; letter-spacing: .04em; flex: none;
+}
+.note-job-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.25; }
+.note-job-sub { color: #c7ccd4; font-size: 14px; margin-top: 3px; }
+.note-modal .modal-scroll { padding: 18px 28px 8px; }
+.note-modal .note-copy { font-size: 17px; margin: 0 0 14px; color: #f5f7fb; }
+.note-modal textarea {
+  min-height: 150px; background: #1b2026; color: #fff; border: 2px solid #d6dbe2;
+  border-radius: 7px; font-size: 16px;
+}
+.note-modal textarea:focus { border-color: #75b9ff; box-shadow: 0 0 0 3px rgba(117,185,255,.18); }
+.note-modal .modal-f { background: #1b2026; border-top: none; padding: 18px 28px 26px; }
+.note-modal .btn { background: #75b9ff; border-color: #75b9ff; color: #05111d; border-radius: 24px; font-size: 16px; padding: 10px 24px; }
+.note-modal .btn:hover { background: #9bcbff; box-shadow: none; }
+.note-modal .btn.ghost { background: transparent; border-color: transparent; color: #d7dbe1; }
+.note-modal .btn.ghost:hover { background: #262c34; color: #fff; }
 
 /* ============================================================
    Stage card (scorecard inside modal)
@@ -490,8 +546,9 @@ input[type=range].slider::-moz-range-thumb {
 ::-webkit-scrollbar-thumb { background: #d4d8df; border-radius: 10px; border: 3px solid var(--bg); }
 
 @media (max-width: 720px) {
+  .board-cols { display: none; }
   .board-row { grid-template-columns: 34px 1fr auto; grid-auto-rows: auto; gap: 8px 12px; }
-  .br-stage, .br-score, .br-verdict { grid-column: 2 / -1; }
+  .br-stage, .br-score, .br-verdict, .br-note { grid-column: 2 / -1; }
   .br-time { grid-column: 2; text-align: left; flex-direction: row; gap: 8px; align-items: baseline; }
   .br-actions { grid-column: 3; grid-row: 1; }
   .stage-tabs { grid-template-columns: repeat(2, 1fr); }
@@ -1068,12 +1125,19 @@ function archiveIcon() {
   );
 }
 
-function EvalRow({ rank, e, onEdit, onDelete, onArchive }) {
+function notePreview(note) {
+  const words = (note || "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "";
+  return words.slice(0, 5).join(" ") + (words.length > 5 ? "..." : "");
+}
+
+function EvalRow({ rank, e, onEdit, onDelete, onArchive, onNote }) {
   const stage = STAGES.find((s) => s.id === e.stageId);
   const stamp = formatStamp(e.ts);
   const metric = metricChip(e);
   const archived = !!e.archived;
   const rowColor = archived ? "archived" : e.color;
+  const preview = notePreview(e.note);
   return (
     <div className={"board-row " + rowColor} onClick={() => onEdit(e)}>
       <div className="br-rank"><span>{rank}</span></div>
@@ -1103,6 +1167,19 @@ function EvalRow({ rank, e, onEdit, onDelete, onArchive }) {
         </span>
       </div>
 
+      <div className="br-note">
+        <button
+          className={"note-btn" + (preview ? " has-note" : "")}
+          onClick={(ev) => { ev.stopPropagation(); onNote(e); }}
+          aria-label={preview ? "Edit note" : "Add note"}
+          type="button"
+        >
+          {!preview && <span className="plus">+</span>}
+          <span className="note-preview">{preview || "Add note"}</span>
+        </button>
+        {e.note && <div className="note-tooltip">{e.note}</div>}
+      </div>
+
       <div className="br-time">
         <span className="t-date">{stamp.date}</span>
         <span className="t-time">{stamp.time}</span>
@@ -1125,7 +1202,7 @@ function EvalRow({ rank, e, onEdit, onDelete, onArchive }) {
   );
 }
 
-function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive }) {
+function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive, onNote }) {
   const g = groupAndRank(evals);
   const archived = evals.filter((e) => e.archived)
     .sort((x, y) => new Date(y.archivedAt || y.ts) - new Date(x.archivedAt || x.ts));
@@ -1162,6 +1239,19 @@ function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive }) {
           </div>
         )}
 
+        {evals.length > 0 && (
+          <div className="board-cols" aria-hidden="true">
+            <span></span>
+            <span>Jobs</span>
+            <span>Stage</span>
+            <span>Score</span>
+            <span>Decision</span>
+            <span>Notes</span>
+            <span>Updated</span>
+            <span></span>
+          </div>
+        )}
+
         {TIER_ORDER.map((k) => (
           g[k].length > 0 && (
             <section className="tier-section" key={k}>
@@ -1173,7 +1263,7 @@ function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive }) {
               </div>
               <div className="board-list">
                 {g[k].map((e, i) => (
-                  <EvalRow key={e.id} rank={i + 1} e={e} onEdit={onEdit} onDelete={onDelete} onArchive={onArchive} />
+                  <EvalRow key={e.id} rank={i + 1} e={e} onEdit={onEdit} onDelete={onDelete} onArchive={onArchive} onNote={onNote} />
                 ))}
               </div>
             </section>
@@ -1190,7 +1280,7 @@ function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive }) {
             </div>
             <div className="board-list">
               {archived.map((e, i) => (
-                <EvalRow key={e.id} rank={i + 1} e={e} onEdit={onEdit} onDelete={onDelete} onArchive={onArchive} />
+                <EvalRow key={e.id} rank={i + 1} e={e} onEdit={onEdit} onDelete={onDelete} onArchive={onArchive} onNote={onNote} />
               ))}
             </div>
           </section>
@@ -1370,10 +1460,50 @@ function ArchiveModal({ item, onClose, onConfirm }) {
   );
 }
 
+function NotesModal({ item, onClose, onSave }) {
+  const [note, setNote] = useState(item.note || "");
+  const stage = STAGES.find((s) => s.id === item.stageId);
+
+  return (
+    <div className="scrim" onClick={onClose}>
+      <div className="modal note-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-h">
+          <div>
+            <h2>Notes</h2>
+          </div>
+          <button className="modal-x" onClick={onClose} aria-label="Close">×</button>
+        </div>
+
+        <div className="note-job">
+          <div className="note-job-logo">CD</div>
+          <div>
+            <div className="note-job-title">{item.title}</div>
+            <div className="note-job-sub">{item.company} · {stage ? stage.name : "Application"}</div>
+          </div>
+        </div>
+
+        <div className="modal-scroll">
+          <p className="note-copy">Add a quick note to remember what stood out about this job.</p>
+          <div className="mfield">
+            <textarea autoFocus value={note} placeholder="Examples: I know the hiring manager"
+              onChange={(e) => setNote(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="modal-f">
+          <button className="btn ghost" onClick={onClose}>Cancel</button>
+          <button className="btn" onClick={() => onSave(item.id, note.trim())}>Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [evals, setEvals] = useState(() => seedIfEmpty());
   const [modal, setModal] = useState(null);
   const [archiveTarget, setArchiveTarget] = useState(null);
+  const [noteTarget, setNoteTarget] = useState(null);
 
   useEffect(() => { saveEvals(evals); }, [evals]);
 
@@ -1382,6 +1512,8 @@ function App() {
   const closeModal = useCallback(() => setModal(null), []);
   const openArchive = useCallback((e) => setArchiveTarget(e), []);
   const closeArchive = useCallback(() => setArchiveTarget(null), []);
+  const openNote = useCallback((e) => setNoteTarget(e), []);
+  const closeNote = useCallback(() => setNoteTarget(null), []);
 
   const handleDelete = useCallback((id) =>
     setEvals((prev) => prev.filter((e) => e.id !== id)), []);
@@ -1391,6 +1523,13 @@ function App() {
       e.id === id ? { ...e, archived: true, archiveReason: reason, archivedAt: nowStamp() } : e
     ));
     setArchiveTarget(null);
+  }, []);
+
+  const handleNoteSave = useCallback((id, note) => {
+    setEvals((prev) => prev.map((e) =>
+      e.id === id ? { ...e, note } : e
+    ));
+    setNoteTarget(null);
   }, []);
 
   function handleSave(draft, stage, verdict) {
@@ -1433,7 +1572,14 @@ function App() {
         <div className="spacer"></div>
       </header>
 
-      <Leaderboard evals={evals} onNew={openNew} onEdit={openEdit} onDelete={handleDelete} onArchive={openArchive} />
+      <Leaderboard
+        evals={evals}
+        onNew={openNew}
+        onEdit={openEdit}
+        onDelete={handleDelete}
+        onArchive={openArchive}
+        onNote={openNote}
+      />
 
       <footer className="northstar">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.9-10-9.5C.4 8 2 4.5 5.5 4.5c2 0 3.4 1.2 4.5 2.6 1.1-1.4 2.5-2.6 4.5-2.6C18 4.5 19.6 8 18 11.5 15.5 16.1 12 21 12 21z" /></svg>
@@ -1446,6 +1592,9 @@ function App() {
       }
       {archiveTarget &&
         <ArchiveModal item={archiveTarget} onClose={closeArchive} onConfirm={handleArchive} />
+      }
+      {noteTarget &&
+        <NotesModal item={noteTarget} onClose={closeNote} onSave={handleNoteSave} />
       }
     </div>
   );
