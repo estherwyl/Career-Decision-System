@@ -1118,7 +1118,7 @@ const TIER_META = {
   A: { color: "green", label: "Tier A", note: "Prioritize — full energy" },
   B: { color: "amber", label: "Tier B", note: "Strategic — proceed carefully" },
   R: { color: "red",   label: "Rejected", note: "Let it go with respect" },
-  X: { color: "gray",  label: "Archived", note: "Inactive applications" },
+  X: { color: "gray",  label: "Archived", note: "" },
 };
 
 function groupAndRank(evals) {
@@ -1152,7 +1152,8 @@ function EvalRow({ rank, e, onEdit, onDelete, onArchive, onNote }) {
   const metric = metricChip(e);
   const archived = !!e.archived;
   const rowColor = archived ? "archived" : e.color;
-  const preview = notePreview(e.note);
+  const displayNote = archived ? (e.note || e.archiveReason || "") : (e.note || "");
+  const preview = notePreview(displayNote);
   return (
     <div className={"board-row " + rowColor} onClick={() => onEdit(e)}>
       <div className="br-rank"><span>{rank}</span></div>
@@ -1160,7 +1161,6 @@ function EvalRow({ rank, e, onEdit, onDelete, onArchive, onNote }) {
       <div className="br-main">
         <div className="br-co">{e.company}</div>
         <div className="br-ti">{e.title}</div>
-        {archived && e.archiveReason && <div className="br-ti">Reason: {e.archiveReason}</div>}
       </div>
 
       <div className="br-stage">
@@ -1170,7 +1170,7 @@ function EvalRow({ rank, e, onEdit, onDelete, onArchive, onNote }) {
 
       <div className="br-score">
         {archived
-          ? <span className="metric gray">inactive</span>
+          ? null
           : metric
           ? <span className={"metric " + e.color}>{metric}</span>
           : <span className="metric ghosted">decision</span>}
@@ -1192,7 +1192,7 @@ function EvalRow({ rank, e, onEdit, onDelete, onArchive, onNote }) {
           {!preview && <span className="plus">+</span>}
           <span className="note-preview">{preview || "Add note"}</span>
         </button>
-        {e.note && <div className="note-tooltip">{e.note}</div>}
+        {displayNote && <div className="note-tooltip">{displayNote}</div>}
       </div>
 
       <div className="br-time">
@@ -1254,19 +1254,6 @@ function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive, onNote }) {
           </div>
         )}
 
-        {evals.length > 0 && (
-          <div className="board-cols" aria-hidden="true">
-            <span></span>
-            <span>Jobs</span>
-            <span>Stage</span>
-            <span>Score</span>
-            <span>Decision</span>
-            <span>Notes</span>
-            <span>Updated</span>
-            <span></span>
-          </div>
-        )}
-
         {TIER_ORDER.map((k) => (
           g[k].length > 0 && (
             <section className="tier-section" key={k}>
@@ -1290,7 +1277,6 @@ function Leaderboard({ evals, onNew, onEdit, onDelete, onArchive, onNote }) {
             <div className={"tier-banner " + TIER_META.X.color}>
               <span className="tb-dot"></span>
               <span className="tb-label">{TIER_META.X.label}</span>
-              <span className="tb-note">{TIER_META.X.note}</span>
               <span className="tb-count">{archived.length}</span>
             </div>
             <div className="board-list">
@@ -1437,8 +1423,8 @@ function EvaluationModal({ draft0, onClose, onSave }) {
 }
 
 function ArchiveModal({ item, onClose, onConfirm }) {
-  const [reason, setReason] = useState("");
-  const canArchive = !!reason.trim();
+  const [note, setNote] = useState("");
+  const canArchive = !!note.trim();
 
   return (
     <div className="scrim" onClick={onClose}>
@@ -1446,7 +1432,7 @@ function ArchiveModal({ item, onClose, onConfirm }) {
         <div className="modal-h">
           <div>
             <h2>Archive application</h2>
-            <p>This will move the role into Archived and mark it inactive.</p>
+            <p>This will move the role into Archived.</p>
           </div>
           <button className="modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
@@ -1458,15 +1444,15 @@ function ArchiveModal({ item, onClose, onConfirm }) {
 
         <div className="modal-scroll">
           <div className="mfield">
-            <label>Reasons</label>
-            <textarea autoFocus value={reason} placeholder="Why are you archiving this role?"
-              onChange={(e) => setReason(e.target.value)} />
+            <label>Notes</label>
+            <textarea autoFocus value={note} placeholder="Add a note about this archived role"
+              onChange={(e) => setNote(e.target.value)} />
           </div>
         </div>
 
         <div className="modal-f">
           <button className="btn ghost" onClick={onClose}>Cancel</button>
-          <button className="btn" disabled={!canArchive} onClick={() => onConfirm(item.id, reason.trim())}>
+          <button className="btn" disabled={!canArchive} onClick={() => onConfirm(item.id, note.trim())}>
             Archive
           </button>
         </div>
@@ -1476,7 +1462,7 @@ function ArchiveModal({ item, onClose, onConfirm }) {
 }
 
 function NotesModal({ item, onClose, onSave }) {
-  const [note, setNote] = useState(item.note || "");
+  const [note, setNote] = useState(item.note || item.archiveReason || "");
   const stage = STAGES.find((s) => s.id === item.stageId);
 
   return (
@@ -1534,16 +1520,16 @@ function App() {
   const handleDelete = useCallback((id) =>
     setEvals((prev) => prev.filter((e) => e.id !== id)), []);
 
-  const handleArchive = useCallback((id, reason) => {
+  const handleArchive = useCallback((id, note) => {
     setEvals((prev) => prev.map((e) =>
-      e.id === id ? { ...e, archived: true, archiveReason: reason, archivedAt: nowStamp() } : e
+      e.id === id ? { ...e, archived: true, note, archiveReason: note, archivedAt: nowStamp() } : e
     ));
     setArchiveTarget(null);
   }, []);
 
   const handleNoteSave = useCallback((id, note) => {
     setEvals((prev) => prev.map((e) =>
-      e.id === id ? { ...e, note } : e
+      e.id === id ? { ...e, note, archiveReason: e.archived ? note : e.archiveReason } : e
     ));
     setNoteTarget(null);
   }, []);
