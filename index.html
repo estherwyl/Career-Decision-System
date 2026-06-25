@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Career Decision System</title>
+<title>JobSense</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
 /* ============================================================
-   Career Decision System — elegant restyle
+   JobSense — elegant restyle
    IBM Plex Sans · clean white cards · soft shadows
    ============================================================ */
 
@@ -1476,7 +1476,7 @@ function NotesModal({ item, onClose, onSave }) {
         </div>
 
         <div className="note-job">
-          <div className="note-job-logo">CD</div>
+          <div className="note-job-logo">JS</div>
           <div>
             <div className="note-job-title">{item.title}</div>
             <div className="note-job-sub">{item.company} · {stage ? stage.name : "Application"}</div>
@@ -1536,7 +1536,7 @@ function App() {
 
   function exportData() {
     const payload = {
-      app: "Career Decision System",
+      app: "JobSense",
       exportedAt: nowStamp(),
       evaluations: evals,
     };
@@ -1561,7 +1561,7 @@ function App() {
         if (!Array.isArray(next)) throw new Error("Missing evaluations");
         setEvals(next);
       } catch (e) {
-        alert("This file does not look like a Career Decision System backup.");
+        alert("This file does not look like a JobSense backup.");
       } finally {
         if (importRef.current) importRef.current.value = "";
       }
@@ -1605,9 +1605,9 @@ function App() {
     <div className="app">
       <header className="appbar">
         <div className="brand">
-          <div className="logo">CD</div>
+          <div className="logo">JS</div>
           <div>
-            <h1>Career Decision System</h1>
+            <h1>JobSense</h1>
             <div className="tag">A structured, low-emotion job search <span className="demo-pill">Demo</span></div>
           </div>
         </div>
